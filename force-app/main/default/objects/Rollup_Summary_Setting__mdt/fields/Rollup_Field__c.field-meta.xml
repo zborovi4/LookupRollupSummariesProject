@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Rollup_Field__c</fullName>
+    <description>Field where the aggregated account shold be written to</description>
+    <externalId>false</externalId>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <label>Rollup Field</label>
+    <metadataRelationshipControllingField>Rollup_Summary_Setting__mdt.Parent_Object__c</metadataRelationshipControllingField>
+    <referenceTo>FieldDefinition</referenceTo>
+    <relationshipLabel>Rollup_Summary_Settings2</relationshipLabel>
+    <relationshipName>Rollup_Summary_Settings2</relationshipName>
+    <required>true</required>
+    <type>MetadataRelationship</type>
+    <unique>false</unique>
+</CustomField>
