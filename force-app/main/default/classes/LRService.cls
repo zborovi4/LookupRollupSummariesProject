@@ -10,7 +10,8 @@ public with sharing class LRService {
     }
 
     public static void recalculateRollupSummaryByChild(List<SObject> childObjectList){
-
+        List<Metadata.Metadata> customMetadataRecords = getCustomMetadataRecords(childObjectList, true);
+        SObject[] sobj = getSojectsToUpdate(customMetadataRecords);
     }
 
     public static void recalculateRollupSummaryByParent(List<Id> parentObjectIds){
@@ -20,7 +21,7 @@ public with sharing class LRService {
     public static void recalculateRollupSummaryByChild(List<Id> childObjectIds){
     }
 
-    private static List<Metadata.Metadata> getCustomMetadataRecords(List<SObject> sobjects, Boolean isChild){
+    public static List<Metadata.Metadata> getCustomMetadataRecords(List<SObject> sobjects, Boolean isChild){
         Set<String> objectNames = new Set<String>();
         for(SObject sObj : sobjects){
             objectNames.add(sObj.getSObjectType().getDescribe().getName());
@@ -44,10 +45,32 @@ public with sharing class LRService {
     }
 
     private static List<Rollup_Summary_Setting__mdt> getRSSByChild(Set<String> objectNames){
-        return [SELECT Id, DeveloperName from Rollup_Summary_Setting__mdt WHERE Child_Object__c IN :objectNames];
+        return [SELECT Id, DeveloperName from Rollup_Summary_Setting__mdt WHERE Active__c = TRUE AND Child_Object__c IN :objectNames];
     }
 
     private static List<Rollup_Summary_Setting__mdt> getRSSByParent(Set<String> objectNames){
-        return [SELECT Id, DeveloperName from Rollup_Summary_Setting__mdt WHERE Parent_Object__c IN :objectNames];
+        return [SELECT Id, DeveloperName from Rollup_Summary_Setting__mdt WHERE Active__c = TRUE AND Parent_Object__c IN :objectNames];
+    }
+
+    private static List<SObject> getSojectsToUpdate(List<Metadata.Metadata> lrsRecords){
+        List<SObject> sobjectsToUpdate = new List<SObject>();
+        for (Metadata.Metadata record : lrsRecords){
+            Metadata.CustomMetadata lrsRecord = (Metadata.CustomMetadata) record;
+            Map<String, String> lrsRecValuesMap = new Map<String, String>();
+            for (Metadata.CustomMetadataValue lrsRecValue : lrsRecord.values){
+                lrsRecValuesMap.put((String)lrsRecValue.field, (String)lrsRecValue.value);
+            }
+
+        }
+        return null;
+    }
+
+    private static SObject[] invokeLRSEgine(Map<String, String> lrsRecValuesMap){
+        SObjectType parentObj = ((SObject) Type.forName(lrsRecValuesMap.get('Parent_Object__c')).newInstance()).getSObjectType();
+        SObjectType childObj = ((SObject) Type.forName(lrsRecValuesMap.get('Child_Object__c')).newInstance()).getSObjectType();
+        Map<String, Schema.SObjectField> schemaFieldMap = childObj.getDescribe().fields.getMap();
+        Schema.DescribeFieldResult relationshipField = schemaFieldMap.get('Lookup_Field__c').getDescribe();
+        LREngine.Context ctx = new LREngine.Context(parentObj, childObj, relationshipField);
+        return null;
     }
 }
